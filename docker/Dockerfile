@@ -1,5 +1,5 @@
 # 源镜像
-FROM golang:1.15.10 builder
+FROM golang:1.15.10 as builder
 # 环境变量
 ENV SRC_PATH $GOPATH/src/httpserver
 ENV BINARY httpserver
