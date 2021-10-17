@@ -1,17 +1,14 @@
 # 源镜像
 FROM golang:1.15.10 as builder
-# 环境变量
-ENV SRC_PATH $GOPATH/src/httpserver
-ENV BINARY httpserver
 # 工作目录
-WORKDIR $SRC_PATH
+WORKDIR /root/src
 # 将httpserver代码放入workdir
-COPY ../src/main.go .
+ADD src/main.go .
 # 构建成可执行文件
-RUN CGO_ENABLED=0 GOOS=linux go build -o $BINARY .
+RUN CGO_ENABLED=0 GOOS=linux go build -o httpserver .
 
 FROM alpine:latest
 WORKDIR /bin
-COPY --from=builder $SRC_PATH/$BINARY .
+COPY --from=builder /root/src/httpserver .
 EXPOSE 8080
-CMD ["./$BINARY"]
+CMD ["./httpserver"]
