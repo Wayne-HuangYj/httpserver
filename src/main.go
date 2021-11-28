@@ -12,6 +12,7 @@ import (
 func main() {
 	http.HandleFunc("/", indexFunc)
 	http.HandleFunc("/healthz", healthzFunc)
+	http.HandleFunc("/ready", readyFunc)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
@@ -37,8 +38,13 @@ func indexFunc(w http.ResponseWriter, r *http.Request) {
 		clientIp = "127.0.0.1"
 	}
 	w.WriteHeader(statusCode)
-	log.Printf("[INFO]%d %s\n", statusCode, clientIp)
+	log.Printf("[INFO]%d %s is accessing\n", statusCode, clientIp)
 	io.WriteString(w, "index")
+}
+
+func readyFunc(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	io.WriteString(w, "Ready")
 }
 
 func healthzFunc(w http.ResponseWriter, r *http.Request) {

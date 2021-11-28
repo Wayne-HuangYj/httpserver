@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpserver-deployment
+spec:
+  selector:
+    matchLables:
+      app: httpserver
+    replicas: 1
+    template:
+      metadata:
+        app: httpserver
+      spec:
+        containers:
+        - name: httpserver
+          image: httpserver:v1
+          ports:
+          - containerPort: 8080
+          lifecycle:
+            # 优雅启动，http get /ready
+            postStart:
+              httpGet:
+                path: /ready
+                port: 8080
+            # 优雅终止，向httpserver进程发送SIGSTOP信号
+            preStop:
+              exec:
+                command: ["/bin/bash", "-c", "kill -19 1"]
+          resource:
+            # Burstable
+            limits:
+              cpu: "2"
+              memorr: "400Mi"
+            requests:
+              cpu: "1"
+              memory: "200Mi"
+          livenessProbe:
+            # 存活探针，http get healthz，延迟3秒访问，5秒访问一次
+            httpGet:
+              path: "/healthz"
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          readinessProbe:
+            # 可读探针，http get ready，延迟3秒访问，5秒访问一次
+            httpGet:
+              path: "/ready"
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            
